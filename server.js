@@ -1,6 +1,7 @@
 require('dotenv').config()
 const  express = require('express')
 const morgan = require('morgan')
+const helmet = require('helmet')
 const cors = require('cors')
 const MOVIEDEX = require('./moviedex.json')
 
@@ -9,6 +10,7 @@ const app = express()
 console.log(process.env.API_TOKEN)
 
 app.use(morgan('dev'))
+app.use(helmet())
 app.use(cors())
 
 app.use(function validateBearerToken(req, res, next) {
@@ -29,6 +31,21 @@ function handleGetMovies(req, res) {
     response = response.filter(movie =>
       movie.genre.toLowerCase().includes(req.query.genre.toLowerCase())
     )
+  }
+
+  if (req.query.country) {
+    response = response.filter(movie => 
+      movie.country.toLowerCase().includes(req.query.country.toLowerCase())
+    )
+  }
+
+  if (req.query.avg_vote) {
+    let number = parseInt(req.query.avg_vote)
+    response = response.filter(movie => {
+      return (
+        movie.avg_vote >= number
+      )
+    })
   }
 
   res.json(response)
